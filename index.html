@@ -138,7 +138,7 @@
             <img src="pics/r10.png" alt="Image">
             <p>after some search i found out that user webdeveloper is in sudo group but we cant directly be root. when we use this command to see what we can do with sudo something interesting appears:</p>
             <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">sudo -l</code></pre></div>
-            <img src="pics/r11.png" alt="Image">
+            <img src="pics/r11n.png" alt="Image">
             <p>we see there is LD_PRELOAD vulnerability.To be root with this vulnerability first we code a c exploit. Source code of exploit is:</p>
             <div class="code-block"><button onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText).then(() => { this.innerText='Copied'; setTimeout(() => { this.innerText='Copy Code'; }, 2000); });">Copy Code</button><pre><code style="width: 100%;">
                 #include &lt;stdio.h&gt;
